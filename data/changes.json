@@ -1,0 +1,23 @@
+[
+  {
+    "timestamp": "2026-10-07T08:15:00Z",
+    "system": "Customer Sync API",
+    "change_type": "CONFIGURATION",
+    "description": "Increased customer sync batch size from 100 to 250 records.",
+    "changed_by": "integration-team"
+  },
+  {
+    "timestamp": "2026-10-07T07:30:00Z",
+    "system": "Billing API",
+    "change_type": "DEPLOYMENT",
+    "description": "Deployed billing API connector version 2.4.1.",
+    "changed_by": "integration-team"
+  },
+  {
+    "timestamp": "2026-10-07T06:45:00Z",
+    "system": "Appointment Sync",
+    "change_type": "MAPPING",
+    "description": "Updated appointment_status field mapping.",
+    "changed_by": "integration-team"
+  }
+]

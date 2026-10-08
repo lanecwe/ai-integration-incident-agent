@@ -1,0 +1,44 @@
+[
+  {
+    "timestamp": "2026-10-07T08:40:12Z",
+    "system": "Customer Sync API",
+    "level": "WARN",
+    "message": "Rate limit threshold approaching",
+    "request_count": 9800
+  },
+  {
+    "timestamp": "2026-10-07T08:41:05Z",
+    "system": "Customer Sync API",
+    "level": "WARN",
+    "message": "Rate limit threshold exceeded",
+    "request_count": 10042
+  },
+  {
+    "timestamp": "2026-10-07T08:42:15Z",
+    "system": "Customer Sync API",
+    "level": "ERROR",
+    "message": "HTTP 429 Too Many Requests returned by downstream API",
+    "request_count": 10120
+  },
+  {
+    "timestamp": "2026-10-07T08:43:01Z",
+    "system": "Customer Sync API",
+    "level": "ERROR",
+    "message": "Customer sync requests rejected due to rate limiting",
+    "request_count": 10145
+  },
+  {
+    "timestamp": "2026-10-07T08:54:42Z",
+    "system": "Billing API",
+    "level": "ERROR",
+    "message": "HTTP 401 Unauthorized returned by downstream API",
+    "request_count": 420
+  },
+  {
+    "timestamp": "2026-10-07T09:11:32Z",
+    "system": "Appointment Sync",
+    "level": "ERROR",
+    "message": "Invalid field mapping: appointment_status",
+    "request_count": 85
+  }
+]

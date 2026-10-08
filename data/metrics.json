@@ -1,0 +1,26 @@
+[
+  {
+    "system": "Customer Sync API",
+    "requests_last_hour": 12450,
+    "average_response_time_ms": 420,
+    "error_rate_percent": 18.4,
+    "rate_limit": 10000,
+    "status": "DEGRADED"
+  },
+  {
+    "system": "Billing API",
+    "requests_last_hour": 420,
+    "average_response_time_ms": 310,
+    "error_rate_percent": 2.1,
+    "rate_limit": 5000,
+    "status": "HEALTHY"
+  },
+  {
+    "system": "Appointment Sync",
+    "requests_last_hour": 85,
+    "average_response_time_ms": 280,
+    "error_rate_percent": 4.7,
+    "rate_limit": 5000,
+    "status": "HEALTHY"
+  }
+]
