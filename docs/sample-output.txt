@@ -1,0 +1,98 @@
+AI Integration Incident Agent — Sample Investigation Output
+LLM client: MockLLM
+
+Scenario: Investigate fictional integration incident INC-1001.
+This is a representative run using mock data. Timestamps and system details are fictional.
+
+--- STEP 1: PROMPT ---
+Investigate integration incident INC-1001.
+
+No tools have been used yet.
+Determine what information you need before diagnosing the incident.
+
+Available tools and their exact signatures:
+- get_incident (arguments: incident_id)
+- search_logs (arguments: system)
+- get_api_metrics (arguments: system)
+- get_recent_changes (arguments: system)
+Use only the listed arguments for each tool.
+
+--- LLM OUTPUT ---
+{'action': 'get_incident', 'arguments': {'incident_id': 'INC-1001'}}
+
+--- STEP 2: TOOL RESULT: get_incident ---
+{
+  'incident_id': 'INC-1001',
+  'severity': 'HIGH',
+  'system': 'Customer Sync API',
+  'error_code': '429',
+  'error_message': 'Too Many Requests',
+  'timestamp': '2026-10-07T08:42:15Z',
+  'status': 'OPEN'
+}
+
+--- LLM OUTPUT ---
+{'action': 'search_logs', 'arguments': {'system': 'customer sync api'}}
+
+--- STEP 3: TOOL RESULT: search_logs ---
+[
+  {'timestamp': '2026-10-07T08:40:12Z', 'system': 'Customer Sync API', 'level': 'WARN', 'message': 'Rate limit threshold approaching', 'request_count': 9800},
+  {'timestamp': '2026-10-07T08:41:05Z', 'system': 'Customer Sync API', 'level': 'WARN', 'message': 'Rate limit threshold exceeded', 'request_count': 10042},
+  {'timestamp': '2026-10-07T08:42:15Z', 'system': 'Customer Sync API', 'level': 'ERROR', 'message': 'HTTP 429 Too Many Requests returned by downstream API', 'request_count': 10120},
+  {'timestamp': '2026-10-07T08:43:01Z', 'system': 'Customer Sync API', 'level': 'ERROR', 'message': 'Customer sync requests rejected due to rate limiting', 'request_count': 10145}
+]
+
+--- LLM OUTPUT ---
+{'action': 'get_api_metrics', 'arguments': {'system': 'customer sync api'}}
+
+--- STEP 4: TOOL RESULT: get_api_metrics ---
+{
+  'system': 'Customer Sync API',
+  'requests_last_hour': 12450,
+  'average_response_time_ms': 420,
+  'error_rate_percent': 18.4,
+  'rate_limit': 10000,
+  'status': 'DEGRADED'
+}
+
+--- LLM OUTPUT ---
+{'action': 'get_recent_changes', 'arguments': {'system': 'customer sync api'}}
+
+--- STEP 5: TOOL RESULT: get_recent_changes ---
+[
+  {'timestamp': '2026-10-07T08:15:00Z', 'system': 'Customer Sync API', 'change_type': 'CONFIGURATION', 'description': 'Increased customer sync batch size from 100 to 250 records.', 'changed_by': 'integration-team'}
+]
+
+--- LLM OUTPUT ---
+{'action': 'finish', 'arguments': {}}
+
+--- FINAL INVESTIGATION RESULT ---
+{
+  'incident_id': 'INC-1001',
+  'diagnosis': {
+    'root_cause': 'Customer Sync API exceeded the downstream API rate limit.',
+    'evidence': [
+      'Requests last hour: 12450',
+      'Configured rate limit: 10000',
+      'Logs show HTTP 429 responses.',
+      'Logs show requests being rejected due to rate limiting.'
+    ],
+    'impact': 'Customer synchronisation requests are being rejected.',
+    'recommendation': 'Reduce request rate and consider throttling, batching, or exponential backoff.',
+    'confidence': 'HIGH',
+    'human_approval_required': True
+  },
+  'tools_used': [
+    'get_incident',
+    'search_logs',
+    'get_api_metrics',
+    'get_recent_changes'
+  ],
+  'steps': 5,
+  'status': 'investigation_complete'
+}
+
+--- INTERPRETATION ---
+The evidence supports rate limiting as the likely cause: observed request volume is above the configured limit, and the logs show HTTP 429 responses and rejected requests. The batch-size increase is a plausible contributing factor, but the available data does not prove it was the sole cause.
+
+The result requires human review. The prototype does not automatically change system configuration or execute remediation.

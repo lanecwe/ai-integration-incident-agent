@@ -1,4 +1,5 @@
-from src.incident_agent.llm import MockLLM
+import inspect
+from src.incident_agent.llm_factory import create_llm
 from src.incident_agent.tool_registry import TOOLS
 from src.incident_agent.diagnosis import diagnose_incident
 
@@ -11,7 +12,8 @@ def investigate_incident(incident_id: str) -> dict:
     Investigate an incident using an agentic tool-calling loop.
     """
 
-    llm = MockLLM()
+    llm = create_llm()
+    print(f"\nLLM client: {type(llm).__name__}")
 
     tools_used = []
     evidence = {}
@@ -50,8 +52,35 @@ def investigate_incident(incident_id: str) -> dict:
             You may request another tool or finish the investigation.
             """
 
+        
+        tool_descriptions = []
+
+        for name, definition in TOOLS.items():
+            function = definition["function"]
+            signature = inspect.signature(function)
+
+            arguments = ", ".join(signature.parameters.keys())
+
+            tool_descriptions.append(
+                f"- {name} (arguments: {arguments})"
+            )
+
+        prompt += (
+            "\nAvailable tools and their exact signatures:\n"
+            + "\n".join(tool_descriptions)
+            + "\nUse only the listed arguments for each tool.\n"
+        )
+
+        # Display the prompt sent to the LLM.
+        print(f"\n--- PROMPT (Step {step + 1}) ---")
+        print(prompt)
+
         # Ask the LLM what to do next.
         tool_request = llm.generate(prompt)
+
+        # Display the parsed response returned by the LLM.
+        print("\n--- LLM OUTPUT ---")
+        print(tool_request)
 
         tool_name = tool_request["action"]
         arguments = tool_request["arguments"]
@@ -75,11 +104,43 @@ def investigate_incident(incident_id: str) -> dict:
             raise ValueError(
                 f"Unknown tool requested: {tool_name}"
             )
+        if tool_name in tools_used:
+            raise ValueError(
+                f"Tool '{tool_name}' has already been executed. "
+                f"Choose a different tool or finish the investigation."
+            )
 
         # Execute the tool.
         tool = TOOLS[tool_name]
+        tool_function = tool["function"]
 
-        result = tool["function"](**arguments)
+        # Validate arguments against the actual Python function signature.
+        signature = inspect.signature(tool_function)
+        allowed_arguments = set(signature.parameters.keys())
+        provided_arguments = set(arguments.keys())
+
+        unexpected_arguments = provided_arguments - allowed_arguments
+        missing_arguments = {
+            name
+            for name, parameter in signature.parameters.items()
+            if parameter.default is inspect.Parameter.empty
+            and name not in provided_arguments
+        }
+
+        if unexpected_arguments:
+            raise ValueError(
+                f"Invalid arguments for {tool_name}: "
+                f"unexpected {sorted(unexpected_arguments)}. "
+                f"Allowed arguments: {sorted(allowed_arguments)}"
+            )
+
+        if missing_arguments:
+            raise ValueError(
+                f"Invalid arguments for {tool_name}: "
+                f"missing {sorted(missing_arguments)}"
+            )
+
+        result = tool_function(**arguments)
 
         tools_used.append(tool_name)
 
